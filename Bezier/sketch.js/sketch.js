@@ -1,79 +1,85 @@
 
-var BezierScreenSizeX=1400;
-var BezierScreenSizeY=800;
+var ScreenSizeX=1400;
+var ScreenSizeY=800;
 
-var PointX = [];
-var PointY = [];
+var selectedPointX = [];
+var selectedPointY = [];
 
-let sonucx=[];
-let sonucy=[];
+let bezierX=[];
+let bezierY=[];
 
 
 function setup() {
-  createCanvas(BezierScreenSizeX,BezierScreenSizeY);
+  createCanvas(ScreenSizeX,ScreenSizeY);
 }
 
 
 function draw() {
-  drawPoints();
+  drawClickedPoints();
   processBezier();
- 
-for(let i =0;i<sonucx.length;i++){
-  noStroke();
-  fill(255);
-ellipse(sonucx[i],sonucy[i],20);
 }
-fill(0);
 
-}
 
 
 function mouseClicked(){
-PointX.push(mouseX);
-PointY.push(mouseY  );
+selectedPointX.push(mouseX);
+selectedPointY.push(mouseY  );
 }
 
 
-function drawPoints(){
+function drawClickedPoints(){
     background(0);
   fill(120,120,255);
-  for(var i=0;i<PointX.length;i++){
-  ellipse(PointX[i],PointY[i],20);
+  for(var i=0;i<selectedPointX.length;i++){
+  ellipse(selectedPointX[i],selectedPointY[i],20);
   }
 }
 
 
 
 function processBezier(){
-
-var n = PointX.length
-
-for(let i=0;i<1001;i++){
-    sonucx[i]=0;
-    sonucy[i]=0;
+  setNullBezierPoints();
+  calculateAllBezierNodes();
+  drawBezierPoints();
+}
+function setNullBezierPoints(){
+  for(let i=0;i<1001;i++){
+    bezierX[i]=0;
+    bezierY[i]=0;
+} 
 }
 
-  let a=0;
-  for(let t=0;t<1001;t=t+1){
-        a=t/1000.0;
+function calculateAllBezierNodes(){
+  var n = selectedPointX.length;
+  for(let bezierPointIndex=0;bezierPointIndex<1001;bezierPointIndex=bezierPointIndex+1){
+    a=bezierPointIndex/1000.0;
+    calculateCurrentBezierNode(n,a,bezierPointIndex);
+}
+}
 
- for(let i=0;i<n;i++){
-        c=kombinasyon(n,i)  * PointX[i] ;
-        c=karealma(a,n,i)  * c ;
-                sonucx[t]=sonucx[t]+c;
+function calculateCurrentBezierNode(n,a,bezierPointIndex){
+  for(let i=0;i<selectedPointX.length;i++){
+    c=getCombination(n,i)  * selectedPointX[i] ;
+    c=getSquare(a,n,i)  * c ;
+    bezierX[bezierPointIndex]=bezierX[bezierPointIndex]+c;
+    
+    b=getCombination(n,i)  * selectedPointY[i] ;
+    b*=getSquare(a,n,i);
+    bezierY[bezierPointIndex]=bezierY[bezierPointIndex]+b;
+}
+}
 
 
-                b=kombinasyon(n,i)  * PointY[i] ;
-     b*=karealma(a,n,i);
-                sonucy[t]=sonucy[t]+b;
-
+function drawBezierPoints(){
+  for(let i =0;i<bezierY.length;i++){
+    noStroke();
+    fill(255);
+  ellipse(bezierX[i],bezierY[i],5);
   }
-
 }
 
-}
 
-function fact( sayi){
+function getFactorial( sayi){
   let fakt=1,i;
   for(i=1;i<=sayi;i++){
       fakt*=i;
@@ -81,29 +87,18 @@ function fact( sayi){
   return fakt;
 }
 
-
-
-function kombinasyon( sayi1, sayi2){
-  sayi1=sayi1-1;
-  let komb=fact(sayi1)/(fact(sayi1-sayi2)*fact(sayi2));
-
-if(sayi2==0)
-  return 1;
-
-  return komb;
-
+function getCombination( nunber1, nunber2){
+  nunber1=nunber1-1;
+  let comb=getFactorial(nunber1)/(getFactorial(nunber1-nunber2)*getFactorial(nunber2));
+  if(nunber1==0)  return 1;
+  return comb;
 }
 
-
-function karealma( t, n, i){
+function getSquare( t, n, i){
 n=n-1;
 let a=pow(t,i);
-
 let b=pow((1-t),n-i);
-
-
 return a*b;
-
 }
 
 
